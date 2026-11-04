@@ -13,6 +13,8 @@ jobs:
   android:
     name: Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # izin bikin tag + release otomatis
     env:
       SIGN: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
@@ -58,10 +60,15 @@ jobs:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Attach to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+      # Tag + Release OTOMATIS tiap build di main (atau pakai tag vX.Y.Z jika di-push manual)
+      - name: Auto tag + Release (APK + AAB)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v1.0.{0}', github.run_number) }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('Build v1.0.{0}', github.run_number) }}
+          generate_release_notes: true
+          fail_on_unmatched_files: false
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
