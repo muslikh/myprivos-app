@@ -3,7 +3,7 @@ import '../core/session.dart';
 import '../config/app_config.dart';
 import '../services/auth_service.dart';
 import '../widgets/async_views.dart';
-import 'home_screen.dart';
+import 'main_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await AuthService.login(_user.text.trim(), _pass.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const MainShell()),
       );
     } catch (e) {
       if (mounted) showSnack(context, '$e', error: true);

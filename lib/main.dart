@@ -3,7 +3,7 @@ import 'core/session.dart';
 import 'config/app_config.dart';
 import 'core/theme.dart';
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +21,7 @@ class MyPrivosApp extends StatelessWidget {
       title: 'MyPrivos',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: Session.instance.isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      home: Session.instance.isLoggedIn ? const MainShell() : const LoginScreen(),
     );
   }
 }
