@@ -18,8 +18,10 @@ class Feature {
   final Color color;
   final String category;
   final Set<String> roles;
+  final bool available; // false = tampil "Segera", belum ada data/tabel
   final WidgetBuilder builder;
-  const Feature(this.title, this.icon, this.color, this.category, this.roles, this.builder);
+  const Feature(this.title, this.icon, this.color, this.category, this.roles, this.builder,
+      {this.available = true});
 }
 
 const _cAkademik = Color(0xFF1565C0);
@@ -32,25 +34,28 @@ final List<Feature> kAllFeatures = [
   Feature('Nilai', Icons.grading, _cAkademik, 'Akademik', {'siswa', 'admin'}, (_) => const NilaiScreen()),
   Feature('Jadwal', Icons.calendar_month, _cAkademik, 'Akademik', {'siswa', 'guru', 'admin'}, (_) => const JadwalScreen()),
   Feature('Kelulusan', Icons.verified, _cAkademik, 'Akademik', {'siswa', 'admin'}, (_) => const KelulusanScreen()),
-  Feature('Ajukan Surat', Icons.mail_outline, _cAdmin, 'Administrasi', {'siswa', 'admin'}, (_) => const SuratRequestScreen()),
   Feature('Pegawai / GTK', Icons.badge_outlined, _cKepegawaian, 'Kepegawaian', {'guru', 'admin'}, (_) => const PegawaiListScreen()),
-  Feature('Kehadiran Kelas', Icons.co_present, _cKepegawaian, 'Kepegawaian', {'guru', 'admin'}, (_) => const PresensiKelasScreen()),
-  Feature('Katalog UPJ', Icons.storefront, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const UpjItemsScreen()),
-  Feature('Jurnal PKL', Icons.menu_book, _cUpj, 'Teaching Factory', {'siswa', 'guru', 'admin'}, (_) => const PklJurnalScreen()),
-  Feature('Pinjam Sarpras', Icons.handyman, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const SarprasPinjamScreen()),
   Feature('Buku Tamu', Icons.how_to_reg, _cAdmin, 'Administrasi', {'admin', 'guru'}, (_) => const TamuListScreen()),
-  Feature('Webmail', Icons.email, _cAdmin, 'Administrasi', {'admin'}, (_) => const WebmailScreen()),
   Feature('Berita Sekolah', Icons.newspaper, _cInfo, 'Informasi', {'siswa', 'guru', 'admin'}, (_) => const BeritaScreen()),
+  // Belum tersedia pada basis data saat ini -> ditandai "Segera".
+  Feature('Ajukan Surat', Icons.mail_outline, _cAdmin, 'Administrasi', {'siswa', 'admin'}, (_) => const SuratRequestScreen(), available: false),
+  Feature('Kehadiran Kelas', Icons.co_present, _cKepegawaian, 'Kepegawaian', {'guru', 'admin'}, (_) => const PresensiKelasScreen(), available: false),
+  Feature('Katalog UPJ', Icons.storefront, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const UpjItemsScreen(), available: false),
+  Feature('Jurnal PKL', Icons.menu_book, _cUpj, 'Teaching Factory', {'siswa', 'guru', 'admin'}, (_) => const PklJurnalScreen(), available: false),
+  Feature('Pinjam Sarpras', Icons.handyman, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const SarprasPinjamScreen(), available: false),
+  Feature('Webmail', Icons.email, _cAdmin, 'Administrasi', {'admin'}, (_) => const WebmailScreen(), available: false),
 ];
 
-List<Feature> featuresFor(String role) =>
-    kAllFeatures.where((f) => f.roles.contains(role)).toList();
+List<Feature> featuresFor(String role) {
+  final list = kAllFeatures.where((f) => f.roles.contains(role)).toList();
+  // yang tersedia di atas, yang "segera" di bawah
+  list.sort((a, b) => (a.available == b.available) ? 0 : (a.available ? -1 : 1));
+  return list;
+}
 
-/// Ordered category list, keeping only categories that have features for role.
 List<String> categoriesFor(String role) {
-  final feats = featuresFor(role);
   final seen = <String>[];
-  for (final f in feats) {
+  for (final f in featuresFor(role)) {
     if (!seen.contains(f.category)) seen.add(f.category);
   }
   return seen;

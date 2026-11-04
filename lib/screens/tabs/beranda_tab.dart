@@ -1,36 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../core/session.dart';
+import '../../widgets/feature_tile.dart';
 import '../features.dart';
 
 class BerandaTab extends StatelessWidget {
   final VoidCallback onOpenLayanan;
   const BerandaTab({super.key, required this.onOpenLayanan});
 
-  String _roleLabel(String r) {
-    switch (r) {
-      case 'admin':
-        return 'Administrator';
-      case 'guru':
-        return 'Guru / Pegawai';
-      case 'siswa':
-        return 'Siswa';
-      default:
-        return r;
-    }
-  }
+  String _roleLabel(String r) =>
+      {'admin': 'Administrator', 'guru': 'Guru / Pegawai', 'siswa': 'Siswa'}[r] ?? r;
 
   @override
   Widget build(BuildContext context) {
     final s = Session.instance.current!;
     final scheme = Theme.of(context).colorScheme;
-    final feats = featuresFor(s.role);
-    final quick = feats.take(6).toList();
+    final quick = featuresFor(s.role).take(6).toList();
 
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 20, 20, 28),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -83,8 +73,7 @@ class BerandaTab extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Akses Cepat',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('Akses Cepat', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 TextButton(onPressed: onOpenLayanan, child: const Text('Semua')),
               ],
             ),
@@ -97,10 +86,10 @@ class BerandaTab extends StatelessWidget {
               crossAxisCount: 3,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 0.95,
+              childAspectRatio: 0.9,
             ),
             delegate: SliverChildBuilderDelegate(
-              (c, i) => _QuickTile(feature: quick[i]),
+              (c, i) => FeatureTile(feature: quick[i]),
               childCount: quick.length,
             ),
           ),
@@ -121,39 +110,6 @@ class BerandaTab extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _QuickTile extends StatelessWidget {
-  final Feature feature;
-  const _QuickTile({required this.feature});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: feature.builder)),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: feature.color.withOpacity(0.14),
-                child: Icon(feature.icon, color: feature.color),
-              ),
-              const SizedBox(height: 8),
-              Text(feature.title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

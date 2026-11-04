@@ -32,7 +32,7 @@ class _MainShellState extends State<MainShell> {
       const ProfilTab(),
     ];
     return Scaffold(
-      body: SafeArea(bottom: false, child: pages[_index]),
+      body: pages[_index],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: _goTo,
