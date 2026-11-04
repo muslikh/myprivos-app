@@ -48,7 +48,7 @@ jobs:
           open(p, "w").write(s)
           print("AndroidManifest patched (INTERNET + REQUEST_INSTALL_PACKAGES + label)")
           PY
-          python3 -c "p='pubspec.yaml';open(p,'w').write(open(p).read().replace('  ios: true','  ios: false'))"
+          python3 -c "p='pubspec.yaml';s=open(p).read().replace('  ios: true','  ios: false');open(p,'w').write(s)"
           dart run flutter_launcher_icons
 
       - name: Setup release signing (optional)
@@ -108,7 +108,7 @@ jobs:
         run: |
           /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName My Privos" ios/Runner/Info.plist \
             || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string My Privos" ios/Runner/Info.plist
-          python3 -c "p='pubspec.yaml';open(p,'w').write(open(p).read().replace('  android: true','  android: false'))"
+          python3 -c "p='pubspec.yaml';s=open(p).read().replace('  android: true','  android: false');open(p,'w').write(s)"
           dart run flutter_launcher_icons || true
       - name: Build iOS (no codesign)
         run: flutter build ios --release --no-codesign
