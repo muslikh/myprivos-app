@@ -25,7 +25,8 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.24.5
+          channel: stable
           cache: true
 
       - name: Generate platform folders + deps
@@ -47,7 +48,7 @@ jobs:
           open(p, "w").write(s)
           print("AndroidManifest patched (INTERNET + REQUEST_INSTALL_PACKAGES + label)")
           PY
-          sed -i 's/^  ios: true/  ios: false/' pubspec.yaml
+          python3 -c "p='pubspec.yaml';open(p,'w').write(open(p).read().replace('  ios: true','  ios: false'))"
           dart run flutter_launcher_icons
 
       - name: Setup release signing (optional)
@@ -96,7 +97,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.24.5
+          channel: stable
           cache: true
       - name: Generate platform folders + deps
         run: |
@@ -106,7 +108,7 @@ jobs:
         run: |
           /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName My Privos" ios/Runner/Info.plist \
             || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string My Privos" ios/Runner/Info.plist
-          sed -i 's/^  android: true/  android: false/' pubspec.yaml
+          python3 -c "p='pubspec.yaml';open(p,'w').write(open(p).read().replace('  android: true','  android: false'))"
           dart run flutter_launcher_icons || true
       - name: Build iOS (no codesign)
         run: flutter build ios --release --no-codesign

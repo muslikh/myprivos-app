@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:ota_update/ota_update.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'update_service.dart';
 
 /// Checks for a newer APK and, if found, shows a popup. On confirm it
-/// downloads + installs in-app via ota_update (Android), falling back to
-/// opening the link in the browser.
+/// downloads the APK itself (with progress) and launches the system
+/// installer via open_filex. Falls back to opening the link in a browser
+/// on non-Android platforms.
 class AppUpdater {
   static bool _checkedThisSession = false;
 
@@ -44,7 +47,7 @@ class AppUpdater {
           FilledButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _startDownload(context, info);
+              _download(context, info);
             },
             child: const Text('Perbarui Sekarang'),
           ),
@@ -53,13 +56,12 @@ class AppUpdater {
     );
   }
 
-  static Future<void> _startDownload(BuildContext context, UpdateInfo info) async {
+  static Future<void> _download(BuildContext context, UpdateInfo info) async {
     bool isAndroid = false;
     try {
       isAndroid = Platform.isAndroid;
     } catch (_) {}
 
-    // Non-Android or plugin unavailable -> open link in browser.
     if (!isAndroid) {
       final uri = Uri.tryParse(info.apkUrl);
       if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -67,7 +69,14 @@ class AppUpdater {
     }
 
     final progress = ValueNotifier<double>(0);
-    final statusText = ValueNotifier<String>('Mempersiapkan unduhan...');
+    final status = ValueNotifier<String>('Mempersiapkan...');
+    bool closed = false;
+    void closeDialog() {
+      if (!closed && context.mounted) {
+        closed = true;
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
 
     showDialog(
       context: context,
@@ -83,7 +92,7 @@ class AppUpdater {
             ),
             const SizedBox(height: 12),
             ValueListenableBuilder<String>(
-              valueListenable: statusText,
+              valueListenable: status,
               builder: (c, t, _) => Text(t, textAlign: TextAlign.center),
             ),
           ],
@@ -91,32 +100,50 @@ class AppUpdater {
       ),
     );
 
+    final client = http.Client();
     try {
-      OtaUpdate()
-          .execute(info.apkUrl, destinationFilename: 'my-privos-update.apk')
-          .listen((OtaEvent event) {
-        switch (event.status) {
-          case OtaStatus.DOWNLOADING:
-            final p = double.tryParse(event.value ?? '') ?? 0;
-            progress.value = p / 100.0;
-            statusText.value = 'Mengunduh... ${event.value ?? '0'}%';
-            break;
-          case OtaStatus.INSTALLING:
-            statusText.value = 'Memasang pembaruan...';
-            break;
-          case OtaStatus.PERMISSION_NOT_GRANTED_ERROR:
-            statusText.value = 'Izin instalasi ditolak. Aktifkan "Install unknown apps".';
-            break;
-          case OtaStatus.DOWNLOAD_ERROR:
-          case OtaStatus.INTERNAL_ERROR:
-          case OtaStatus.CHECKSUM_ERROR:
-          case OtaStatus.ALREADY_RUNNING_ERROR:
-            statusText.value = 'Gagal mengunduh. Coba lagi nanti.';
-            break;
+      final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
+      final path = '${dir.path}/my-privos-update.apk';
+      final sink = File(path).openWrite();
+
+      final req = http.Request('GET', Uri.parse(info.apkUrl));
+      final resp = await client.send(req);
+      if (resp.statusCode != 200) {
+        throw 'HTTP ${resp.statusCode}';
+      }
+      final total = resp.contentLength ?? 0;
+      int received = 0;
+
+      await resp.stream.forEach((chunk) {
+        sink.add(chunk);
+        received += chunk.length;
+        if (total > 0) {
+          progress.value = received / total;
+          status.value = 'Mengunduh... ${(progress.value * 100).toStringAsFixed(0)}%';
+        } else {
+          status.value = 'Mengunduh... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
         }
       });
+      await sink.flush();
+      await sink.close();
+
+      status.value = 'Membuka pemasang...';
+      final res = await OpenFilex.open(path, type: 'application/vnd.android.package-archive');
+      closeDialog();
+      if (res.type != ResultType.done && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tidak bisa membuka pemasang: ${res.message}. Aktifkan "Install unknown apps".')),
+        );
+      }
     } catch (e) {
-      statusText.value = 'Gagal memulai unduhan: $e';
+      closeDialog();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengunduh pembaruan: $e'), backgroundColor: Colors.red.shade700),
+        );
+      }
+    } finally {
+      client.close();
     }
   }
 }
