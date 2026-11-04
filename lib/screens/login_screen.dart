@@ -13,9 +13,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _form = GlobalKey<FormState>();
-  final _server = TextEditingController(text: Session.instance.baseUrl.isNotEmpty
-          ? Session.instance.baseUrl
-          : AppConfig.defaultBaseUrl);
   final _user = TextEditingController();
   final _pass = TextEditingController();
   bool _loading = false;
@@ -23,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _server.dispose();
     _user.dispose();
     _pass.dispose();
     super.dispose();
@@ -33,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_form.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      await Session.instance.saveBaseUrl(_server.text);
+      // Server URL dikunci ke domain produksi (tidak bisa diubah pengguna).
+      await Session.instance.saveBaseUrl(AppConfig.defaultBaseUrl);
       await AuthService.login(_user.text.trim(), _pass.text);
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
@@ -62,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Icon(Icons.school_rounded, size: 72, color: scheme.primary),
                   const SizedBox(height: 12),
-                  Text('MyPrivos',
+                  Text('My Privos',
                       textAlign: TextAlign.center,
                       style: Theme.of(context)
                           .textTheme
@@ -72,22 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium),
                   const SizedBox(height: 28),
-                  TextFormField(
-                    controller: _server,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      labelText: 'Server URL',
-                      hintText: 'https://sekolah.sch.id',
-                      prefixIcon: Icon(Icons.dns_outlined),
-                    ),
-                    validator: (v) {
-                      final t = (v ?? '').trim();
-                      if (t.isEmpty) return 'Server URL wajib diisi';
-                      if (!t.startsWith('http')) return 'Harus diawali http:// atau https://';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 14),
                   TextFormField(
                     controller: _user,
                     decoration: const InputDecoration(

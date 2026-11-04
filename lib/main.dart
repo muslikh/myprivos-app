@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/session.dart';
+import 'config/app_config.dart';
 import 'core/theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
@@ -7,6 +8,7 @@ import 'screens/home_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Session.instance.load();
+  await Session.instance.saveBaseUrl(AppConfig.defaultBaseUrl);
   runApp(const MyPrivosApp());
 }
 
