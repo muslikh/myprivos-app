@@ -38,12 +38,12 @@ final List<Feature> kAllFeatures = [
   Feature('Buku Tamu', Icons.how_to_reg, _cAdmin, 'Administrasi', {'admin', 'guru'}, (_) => const TamuListScreen()),
   Feature('Berita Sekolah', Icons.newspaper, _cInfo, 'Informasi', {'siswa', 'guru', 'admin'}, (_) => const BeritaScreen()),
   // Belum tersedia pada basis data saat ini -> ditandai "Segera".
-  Feature('Ajukan Surat', Icons.mail_outline, _cAdmin, 'Administrasi', {'siswa', 'admin'}, (_) => const SuratRequestScreen(), available: false),
-  Feature('Kehadiran Kelas', Icons.co_present, _cKepegawaian, 'Kepegawaian', {'guru', 'admin'}, (_) => const PresensiKelasScreen(), available: false),
-  Feature('Katalog UPJ', Icons.storefront, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const UpjItemsScreen(), available: false),
-  Feature('Jurnal PKL', Icons.menu_book, _cUpj, 'Teaching Factory', {'siswa', 'guru', 'admin'}, (_) => const PklJurnalScreen(), available: false),
-  Feature('Pinjam Sarpras', Icons.handyman, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const SarprasPinjamScreen(), available: false),
-  Feature('Webmail', Icons.email, _cAdmin, 'Administrasi', {'admin'}, (_) => const WebmailScreen(), available: false),
+  Feature('Ajukan Surat', Icons.mail_outline, _cAdmin, 'Administrasi', {'siswa', 'admin'}, (_) => const SuratRequestScreen()),
+  Feature('Kehadiran Kelas', Icons.co_present, _cKepegawaian, 'Kepegawaian', {'guru', 'admin'}, (_) => const PresensiKelasScreen()),
+  Feature('Katalog UPJ', Icons.storefront, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const UpjItemsScreen()),
+  Feature('Jurnal PKL', Icons.menu_book, _cUpj, 'Teaching Factory', {'siswa', 'guru', 'admin'}, (_) => const PklJurnalScreen()),
+  Feature('Pinjam Sarpras', Icons.handyman, _cUpj, 'Teaching Factory', {'guru', 'admin'}, (_) => const SarprasPinjamScreen()),
+  Feature('Webmail', Icons.email, _cAdmin, 'Administrasi', {'admin'}, (_) => const WebmailScreen()),
 ];
 
 List<Feature> featuresFor(String role) {

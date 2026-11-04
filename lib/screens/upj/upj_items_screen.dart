@@ -9,7 +9,6 @@ class UpjItemsScreen extends StatefulWidget {
 }
 
 class _UpjItemsScreenState extends State<UpjItemsScreen> {
-  // itemId -> {item, qty}
   final Map<dynamic, Map<String, dynamic>> _cart = {};
 
   num get _total {
@@ -20,6 +19,8 @@ class _UpjItemsScreenState extends State<UpjItemsScreen> {
     });
     return t;
   }
+
+  int get _count => _cart.values.fold(0, (a, v) => a + (v['qty'] as int));
 
   void _add(Map<String, dynamic> item) {
     final id = item['id'];
@@ -46,14 +47,12 @@ class _UpjItemsScreenState extends State<UpjItemsScreen> {
 
   Future<void> _checkout() async {
     if (_cart.isEmpty) return;
-    final items = _cart.entries
-        .map((e) => {'id': e.key, 'qty': e.value['qty']})
-        .toList();
+    final items = _cart.entries.map((e) => {'id': e.key, 'qty': e.value['qty']}).toList();
     try {
       final r = await UpjService.checkout(items: items, paidAmount: _total);
       if (!mounted) return;
       final tx = r['transaction_code'] ?? r['kode'] ?? r['id'] ?? '';
-      showSnack(context, 'Transaksi berhasil. $tx');
+      showSnack(context, 'Pesanan berhasil diproses. $tx');
       setState(() => _cart.clear());
     } catch (e) {
       if (mounted) showSnack(context, friendlyError(e), error: true);
@@ -62,57 +61,82 @@ class _UpjItemsScreenState extends State<UpjItemsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Katalog UPJ')),
       body: AsyncList<Map<String, dynamic>>(
+        emptyText: 'Katalog belum tersedia.',
+        emptyIcon: Icons.storefront_outlined,
         loader: () async =>
             (await UpjService.items()).map((e) => Map<String, dynamic>.from(e)).toList(),
-        emptyText: 'Katalog kosong.',
         itemBuilder: (c, item) {
           final id = item['id'];
           final qty = _cart[id]?['qty'] as int? ?? 0;
           final price = item['price'] ?? item['harga'] ?? 0;
           return Card(
-            child: ListTile(
-              title: Text('${item['name'] ?? item['nama'] ?? '-'}'),
-              subtitle: Text('Rp $price  •  ${item['type'] ?? ''}'),
-              trailing: qty == 0
-                  ? IconButton(
-                      icon: const Icon(Icons.add_shopping_cart),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: scheme.primaryContainer,
+                    child: Icon(Icons.inventory_2_outlined, color: scheme.onPrimaryContainer),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${item['name'] ?? item['nama'] ?? '-'}',
+                            style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text('Rp $price', style: TextStyle(color: scheme.primary)),
+                      ],
+                    ),
+                  ),
+                  if (qty == 0)
+                    FilledButton.tonal(
                       onPressed: () => _add(item),
+                      child: const Text('Pesan'),
                     )
-                  : Row(
+                  else
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => _remove(id)),
-                        Text('$qty'),
+                        Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold)),
                         IconButton(icon: const Icon(Icons.add_circle_outline), onPressed: () => _add(item)),
                       ],
                     ),
+                ],
+              ),
             ),
           );
         },
       ),
-      bottomNavigationBar: _cart.isEmpty
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: Text('${_cart.length} item • Total Rp $_total',
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    FilledButton.icon(
-                      onPressed: _checkout,
-                      icon: const Icon(Icons.point_of_sale),
-                      label: const Text('Checkout'),
-                    ),
+                    Text('$_count item', style: TextStyle(color: scheme.outline, fontSize: 12)),
+                    Text('Total Rp $_total', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ],
                 ),
               ),
-            ),
+              FilledButton.icon(
+                onPressed: _cart.isEmpty ? null : _checkout,
+                icon: const Icon(Icons.shopping_cart_checkout),
+                label: const Text('Checkout'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

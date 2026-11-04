@@ -59,15 +59,27 @@ class _NilaiScreenState extends State<NilaiScreen> {
                         .map((e) => Map<String, dynamic>.from(e))
                         .toList(),
                     emptyText: 'Belum ada nilai.',
-                    itemBuilder: (c, n) => Card(
-                      child: ListTile(
-                        leading: CircleAvatar(child: Text('${n['semester'] ?? '-'}')),
-                        title: Text('Semester ${n['semester'] ?? '-'}'),
-                        subtitle: const Text('Nilai rapor'),
-                        trailing: Text('${n['nilai'] ?? '-'}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      ),
-                    ),
+                    itemBuilder: (c, n) {
+                      final p = n['pengetahuan'];
+                      final k = n['keterampilan'];
+                      final kkm = n['kkm'];
+                      final main = p ?? n['nilai'] ?? '-';
+                      final detail = (p != null || k != null)
+                          ? 'Pengetahuan: ${p ?? '-'}   •   Keterampilan: ${k ?? '-'}'
+                              '${kkm != null ? '   •   KKM: $kkm' : ''}'
+                          : (kkm != null ? 'KKM: $kkm' : null);
+                      return Card(
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text('${n['semester'] ?? '-'}', style: const TextStyle(fontSize: 12)),
+                          ),
+                          title: Text('${n['mapel'] ?? 'Mata Pelajaran'}'),
+                          subtitle: detail != null ? Text(detail, style: const TextStyle(fontSize: 12)) : null,
+                          trailing: Text('$main',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        ),
+                      );
+                    },
                   ),
           ),
         ],
