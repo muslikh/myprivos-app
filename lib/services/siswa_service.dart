@@ -15,4 +15,14 @@ class SiswaService {
     final r = await ApiClient.instance.get('/kelulusan', query: {'nisn': identifier});
     return r.map;
   }
+
+  static Future<List<dynamic>> kelasList() async {
+    final r = await ApiClient.instance.get('/ref/kelas');
+    return r.list;
+  }
+
+  static Future<List<dynamic>> students({String? kelas}) async {
+    final r = await ApiClient.instance.get('/siswa', query: {'kelas': kelas, 'limit': 500});
+    return r.list;
+  }
 }
