@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/session.dart';
 import '../services/auth_service.dart';
+import '../services/app_updater.dart';
 import '../widgets/async_views.dart';
 import 'login_screen.dart';
 import 'siswa/nilai_screen.dart';
@@ -24,8 +25,21 @@ class _Feature {
   const _Feature(this.title, this.icon, this.roles, this.builder);
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) AppUpdater.maybePrompt(context);
+    });
+  }
 
   static final List<_Feature> _all = [
     // Siswa

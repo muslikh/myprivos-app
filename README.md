@@ -51,3 +51,21 @@ Folder `android/` & `ios/` tidak dikomit — digenerate di CI oleh `flutter crea
 - **Firebase App Distribution** (bagus untuk bagi APK/IPA ke tester): tambah step `wzieba/Firebase-Distribution-Github-Action` dengan `FIREBASE_APP_ID` + token.
 - **Google Play** (Android): `r0adkll/upload-google-play` + service account JSON.
 - **TestFlight/App Store** (iOS): setelah signing beres.
+
+---
+
+## Auto-update (popup + unduh otomatis)
+
+App mengecek `GET {server}/api/v2/app/version` saat masuk Home. Jika `latest_build` > build terpasang, muncul popup; tombol **Perbarui Sekarang** mengunduh APK (ota_update) dan memicu pemasangan.
+
+Backend (Laravel) mengembalikan nilai dari `.env`:
+```
+APP_LATEST_VERSION=1.0.5
+APP_LATEST_BUILD=5
+APP_APK_URL=https://my.smkn1prigen.sch.id/app/my-privos.apk
+APP_UPDATE_MANDATORY=false
+APP_UPDATE_NOTES=Perbaikan login & ikon baru
+```
+- `APP_LATEST_BUILD` = nomor build rilis terbaru (samakan dengan `v1.0.<run>` dari Actions, mis. run 5 → 5).
+- `APP_APK_URL` = lokasi APK yang bisa diunduh publik (unggah ke server, atau mirror dari Release). APK dari Release repo privat butuh auth, jadi host di server lebih mudah.
+- Nama app: **My Privos**. Ikon: logo SMKN 1 Prigen.

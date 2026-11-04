@@ -14,7 +14,7 @@ jobs:
     name: Android APK
     runs-on: ubuntu-latest
     permissions:
-      contents: write        # izin bikin tag + release otomatis
+      contents: write
     env:
       SIGN: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
@@ -33,6 +33,22 @@ jobs:
           flutter create . --platforms android --org com.smkn1prigen --project-name myprivos_app
           flutter pub get
 
+      - name: Konfigurasi Android (izin internet, nama, ikon)
+        run: |
+          python3 - <<'PY'
+          import re
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          perms = ('    <uses-permission android:name="android.permission.INTERNET"/>\n'
+                   '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>\n')
+          if "android.permission.INTERNET" not in s:
+              s = re.sub(r'(<manifest\b[^>]*>)', r'\1\n' + perms, s, count=1, flags=re.S)
+          s = re.sub(r'android:label="[^"]*"', 'android:label="My Privos"', s, count=1)
+          open(p, "w").write(s)
+          print("AndroidManifest patched (INTERNET + REQUEST_INSTALL_PACKAGES + label)")
+          PY
+          dart run flutter_launcher_icons
+
       - name: Setup release signing (optional)
         if: env.SIGN == 'true'
         env:
@@ -50,17 +66,16 @@ jobs:
           EOF
 
       - name: Build APK (release)
-        run: flutter build apk --release
+        run: flutter build apk --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }}
 
       - name: Build AAB (release)
-        run: flutter build appbundle --release || true
+        run: flutter build appbundle --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }} || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      # Tag + Release OTOMATIS tiap build di main (atau pakai tag vX.Y.Z jika di-push manual)
       - name: Auto tag + Release (APK + AAB)
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -86,6 +101,11 @@ jobs:
         run: |
           flutter create . --platforms ios --org com.smkn1prigen --project-name myprivos_app
           flutter pub get
+      - name: Nama app + ikon iOS
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName My Privos" ios/Runner/Info.plist \
+            || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string My Privos" ios/Runner/Info.plist
+          dart run flutter_launcher_icons || true
       - name: Build iOS (no codesign)
         run: flutter build ios --release --no-codesign
       - name: Package .app artifact

@@ -1,5 +1,5 @@
 name: myprivos_app
-description: Aplikasi mobile MyPrivos (SMKN 1 Prigen) - konsumsi REST API v2 (JWT).
+description: Aplikasi mobile My Privos (SMKN 1 Prigen) - konsumsi REST API v2 (JWT).
 publish_to: "none"
 version: 1.0.0+1
 
@@ -12,9 +12,23 @@ dependencies:
   http: ^1.2.0
   shared_preferences: ^2.2.0
   intl: ^0.19.0
+  package_info_plus: ^8.0.0
+  url_launcher: ^6.2.5
+  ota_update: ^6.0.0
 
 dev_dependencies:
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/app_icon.png
