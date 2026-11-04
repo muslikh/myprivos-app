@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const MainShell()),
       );
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, 'Gagal masuk. Periksa username/password atau koneksi.', error: true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

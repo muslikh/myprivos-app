@@ -35,7 +35,7 @@ class _SarprasPinjamScreenState extends State<SarprasPinjamScreen> {
           : 'Peminjaman tercatat.');
       Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

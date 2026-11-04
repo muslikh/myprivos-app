@@ -45,7 +45,7 @@ class _PresensiKelasScreenState extends State<PresensiKelasScreen> {
       showSnack(context, 'Kehadiran kelas tercatat.');
       Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

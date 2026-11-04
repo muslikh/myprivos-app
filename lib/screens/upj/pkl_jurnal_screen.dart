@@ -46,7 +46,7 @@ class _PklJurnalScreenState extends State<PklJurnalScreen> {
       showSnack(context, 'Jurnal PKL terkirim.');
       Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

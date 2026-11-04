@@ -15,6 +15,12 @@ class _JadwalScreenState extends State<JadwalScreen> {
   String? _query;
 
   @override
+  void initState() {
+    super.initState();
+    if (_kelas.text.trim().isNotEmpty) _query = _kelas.text.trim();
+  }
+
+  @override
   void dispose() {
     _kelas.dispose();
     super.dispose();

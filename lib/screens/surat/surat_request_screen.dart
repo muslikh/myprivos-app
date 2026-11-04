@@ -63,7 +63,7 @@ class _SuratRequestScreenState extends State<SuratRequestScreen> {
       showSnack(context, 'Surat diajukan. $nomor');
       Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -76,7 +76,7 @@ class _SuratRequestScreenState extends State<SuratRequestScreen> {
       body: _loadingTpl
           ? const Center(child: CircularProgressIndicator())
           : _tplError != null
-              ? ErrorRetry(message: _tplError!, onRetry: _loadTemplates)
+              ? EmptyState(text: 'Daftar surat belum tersedia.', icon: Icons.mail_outline, onRetry: () async => _loadTemplates())
               : Form(
                   key: _form,
                   child: ListView(

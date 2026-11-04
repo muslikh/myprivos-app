@@ -11,7 +11,7 @@ class KelulusanScreen extends StatefulWidget {
 
 class _KelulusanScreenState extends State<KelulusanScreen> {
   late final TextEditingController _id =
-      TextEditingController(text: Session.instance.current?.user['nisn']?.toString() ?? '');
+      TextEditingController();
   bool _loading = false;
   Map<String, dynamic>? _result;
   String? _error;
@@ -31,7 +31,7 @@ class _KelulusanScreenState extends State<KelulusanScreen> {
     try {
       _result = await SiswaService.kelulusan(_id.text.trim());
     } catch (e) {
-      _error = '$e';
+      _error = 'Data kelulusan belum tersedia.';
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -47,7 +47,7 @@ class _KelulusanScreenState extends State<KelulusanScreen> {
           children: [
             TextField(
               controller: _id,
-              decoration: const InputDecoration(labelText: 'NISN / No. Ujian'),
+              decoration: const InputDecoration(labelText: 'No. Ujian', prefixIcon: Icon(Icons.confirmation_number_outlined)),
             ),
             const SizedBox(height: 12),
             FilledButton(
@@ -57,7 +57,7 @@ class _KelulusanScreenState extends State<KelulusanScreen> {
                   : const Text('Cek Kelulusan'),
             ),
             const SizedBox(height: 20),
-            if (_error != null) ErrorRetry(message: _error!, onRetry: _check),
+            if (_error != null) EmptyState(text: _error!, icon: Icons.search_off, onRetry: () async => _check()),
             if (_result != null)
               Card(
                 child: Padding(

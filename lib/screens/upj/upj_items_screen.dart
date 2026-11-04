@@ -56,7 +56,7 @@ class _UpjItemsScreenState extends State<UpjItemsScreen> {
       showSnack(context, 'Transaksi berhasil. $tx');
       setState(() => _cart.clear());
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     }
   }
 

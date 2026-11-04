@@ -27,40 +27,33 @@ class _TamuListScreenState extends State<TamuListScreen> {
       ),
       body: AsyncList<Map<String, dynamic>>(
         key: ValueKey(_reload),
+        emptyText: 'Belum ada tamu yang tercatat.',
+        emptyIcon: Icons.how_to_reg_outlined,
         loader: () async =>
             (await TamuService.list()).map((e) => Map<String, dynamic>.from(e)).toList(),
-        emptyText: 'Belum ada tamu.',
-        itemBuilder: (c, t) {
-          final status = '${t['status'] ?? ''}';
-          final selesai = status.toLowerCase().contains('selesai') || t['waktu_keluar'] != null;
-          return Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: selesai ? Colors.grey.shade300 : null,
-                child: const Icon(Icons.person),
-              ),
-              title: Text('${t['nama_tamu'] ?? '-'}'),
-              subtitle: Text('${t['instansi'] ?? '-'}\nBertemu: ${t['bertemu_dengan'] ?? '-'} • ${t['keperluan'] ?? ''}'),
-              isThreeLine: true,
-              trailing: selesai
-                  ? const Chip(label: Text('Selesai'))
-                  : TextButton(
-                      onPressed: () async {
-                        try {
-                          await TamuService.checkOut(t['id']);
-                          if (!context.mounted) return;
-                          showSnack(context, 'Check-out berhasil.');
-                          setState(() => _reload++);
-                        } catch (e) {
-                          if (context.mounted) showSnack(context, '$e', error: true);
-                        }
-                      },
-                      child: const Text('Check-out'),
-                    ),
+        itemBuilder: (c, t) => Card(
+          child: ListTile(
+            leading: const CircleAvatar(child: Icon(Icons.person)),
+            title: Text('${t['nama_tamu'] ?? '-'}'),
+            subtitle: Text(
+              '${t['alamat_tamu'] ?? ''}\n${t['pesan_tamu'] ?? ''}',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
-          );
-        },
+            isThreeLine: true,
+            trailing: Text(
+              _fmt('${t['waktu'] ?? ''}'),
+              style: const TextStyle(fontSize: 11),
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  String _fmt(String iso) {
+    final d = DateTime.tryParse(iso);
+    if (d == null) return '';
+    return '${d.day}/${d.month}\n${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
 }

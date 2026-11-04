@@ -11,16 +11,14 @@ class TamuFormScreen extends StatefulWidget {
 class _TamuFormScreenState extends State<TamuFormScreen> {
   final _form = GlobalKey<FormState>();
   final _nama = TextEditingController();
-  final _instansi = TextEditingController();
+  final _alamat = TextEditingController();
   final _hp = TextEditingController();
-  final _bertemu = TextEditingController();
-  final _keperluan = TextEditingController();
-  final _plat = TextEditingController();
+  final _pesan = TextEditingController();
   bool _submitting = false;
 
   @override
   void dispose() {
-    for (final c in [_nama, _instansi, _hp, _bertemu, _keperluan, _plat]) {
+    for (final c in [_nama, _alamat, _hp, _pesan]) {
       c.dispose();
     }
     super.dispose();
@@ -32,17 +30,15 @@ class _TamuFormScreenState extends State<TamuFormScreen> {
     try {
       await TamuService.store(
         namaTamu: _nama.text.trim(),
-        instansi: _instansi.text.trim().isEmpty ? null : _instansi.text.trim(),
+        alamat: _alamat.text.trim().isEmpty ? null : _alamat.text.trim(),
         noHp: _hp.text.trim().isEmpty ? null : _hp.text.trim(),
-        bertemuDengan: _bertemu.text.trim(),
-        keperluan: _keperluan.text.trim(),
-        platNomor: _plat.text.trim().isEmpty ? null : _plat.text.trim(),
+        pesan: _pesan.text.trim(),
       );
       if (!mounted) return;
-      showSnack(context, 'Tamu tercatat.');
+      showSnack(context, 'Kunjungan tamu tercatat.');
       Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -57,12 +53,10 @@ class _TamuFormScreenState extends State<TamuFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _tf(_nama, 'Nama Tamu', req: true),
-            _tf(_instansi, 'Instansi (opsional)'),
-            _tf(_hp, 'No. HP (opsional)', number: true),
-            _tf(_bertemu, 'Bertemu dengan', req: true),
-            _tf(_keperluan, 'Keperluan', req: true, lines: 2),
-            _tf(_plat, 'Plat Nomor (opsional)'),
+            _tf(_nama, 'Nama Tamu', Icons.person_outline, req: true),
+            _tf(_alamat, 'Alamat / Instansi', Icons.location_on_outlined),
+            _tf(_hp, 'No. HP', Icons.phone_outlined, number: true),
+            _tf(_pesan, 'Keperluan / Pesan', Icons.message_outlined, req: true, lines: 3),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _submitting ? null : _submit,
@@ -76,7 +70,7 @@ class _TamuFormScreenState extends State<TamuFormScreen> {
     );
   }
 
-  Widget _tf(TextEditingController c, String label,
+  Widget _tf(TextEditingController c, String label, IconData icon,
       {bool req = false, bool number = false, int lines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -84,7 +78,7 @@ class _TamuFormScreenState extends State<TamuFormScreen> {
         controller: c,
         maxLines: lines,
         keyboardType: number ? TextInputType.phone : TextInputType.text,
-        decoration: InputDecoration(labelText: label),
+        decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
         validator: req ? (v) => (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null : null,
       ),
     );

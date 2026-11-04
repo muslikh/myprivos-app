@@ -85,7 +85,7 @@ class _ComposeTabState extends State<_ComposeTab> {
       _subject.clear();
       _body.clear();
     } catch (e) {
-      if (mounted) showSnack(context, '$e', error: true);
+      if (mounted) showSnack(context, friendlyError(e), error: true);
     } finally {
       if (mounted) setState(() => _sending = false);
     }

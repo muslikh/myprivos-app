@@ -15,6 +15,12 @@ class _NilaiScreenState extends State<NilaiScreen> {
   String? _query;
 
   @override
+  void initState() {
+    super.initState();
+    if (_nisn.text.trim().isNotEmpty) _query = _nisn.text.trim();
+  }
+
+  @override
   void dispose() {
     _nisn.dispose();
     super.dispose();
@@ -55,11 +61,11 @@ class _NilaiScreenState extends State<NilaiScreen> {
                     emptyText: 'Belum ada nilai.',
                     itemBuilder: (c, n) => Card(
                       child: ListTile(
-                        leading: const Icon(Icons.subject),
-                        title: Text('${n['mapel'] ?? n['nama_mapel'] ?? 'Mapel'}'),
-                        subtitle: Text('Semester: ${n['semester'] ?? '-'}'),
-                        trailing: Text('${n['nilai'] ?? n['nilai_akhir'] ?? '-'}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        leading: CircleAvatar(child: Text('${n['semester'] ?? '-'}')),
+                        title: Text('Semester ${n['semester'] ?? '-'}'),
+                        subtitle: const Text('Nilai rapor'),
+                        trailing: Text('${n['nilai'] ?? '-'}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                     ),
                   ),

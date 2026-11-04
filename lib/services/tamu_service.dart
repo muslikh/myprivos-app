@@ -8,24 +8,16 @@ class TamuService {
 
   static Future<Map<String, dynamic>> store({
     required String namaTamu,
-    String? instansi,
+    String? alamat,
     String? noHp,
-    required String bertemuDengan,
-    required String keperluan,
-    String? platNomor,
+    required String pesan,
   }) async {
     final r = await ApiClient.instance.post('/tamu', body: {
       'nama_tamu': namaTamu,
-      'instansi': instansi,
-      'no_hp': noHp,
-      'bertemu_dengan': bertemuDengan,
-      'keperluan': keperluan,
-      'plat_nomor': platNomor,
+      'alamat_tamu': alamat,
+      'nohp_tamu': noHp,
+      'pesan_tamu': pesan,
     });
     return r.map;
-  }
-
-  static Future<void> checkOut(dynamic id) async {
-    await ApiClient.instance.post('/tamu/$id/checkout');
   }
 }
