@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/session.dart';
+import '../config/app_config.dart';
 import '../services/auth_service.dart';
 import '../widgets/async_views.dart';
 import 'home_screen.dart';
@@ -12,7 +13,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _form = GlobalKey<FormState>();
-  final _server = TextEditingController(text: Session.instance.baseUrl);
+  final _server = TextEditingController(text: Session.instance.baseUrl.isNotEmpty
+          ? Session.instance.baseUrl
+          : AppConfig.defaultBaseUrl);
   final _user = TextEditingController();
   final _pass = TextEditingController();
   bool _loading = false;
